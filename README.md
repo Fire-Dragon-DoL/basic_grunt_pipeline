@@ -36,6 +36,56 @@ Just run `npm install`, `bundle install` and `bower install`. All requirements w
 - **rvm** (1.25.0)
 - **nvm**
 
+## Setup
+
+You need to point an Nginx (or Apache or any other webserver) to the `.tmp` directory (development) or `dist`
+directory if you want to see the production application.
+
+Here is my very small and far from perfect nginx configuration:
+
+```nginx
+server {
+        listen   8080;
+
+        server_name dev.basicgruntpipeline.localhost;
+
+        location / {
+                allow 127.0.0.1;
+                allow ::1;
+                # You can remove this if you don't want LAN access, I use it to test with IE
+                allow 192.168.1.0/24;
+                deny all;
+
+                root /home/francesco/projects/web/basic_grunt_pipeline/.tmp;
+                index index.html;
+                error_page 404 /404.html;
+
+				# I found multiple ways to serve index.html page for angular servers, I performed 3 tries
+                # and I've chosen the last one
+                # 1
+                #if (!-e $request_filename) {
+                #       rewrite ^(.*)$ /index.html break;
+                #}
+                # 2
+                #rewrite $uri /index.html;
+                # 3
+                try_files $uri /index.html;
+        }
+}
+```
+
+You need to point dev.basicgruntpipeline.localhost to `127.0.0.1` in your `/etc/hosts` file.
+
+## Usage
+
+It's very easy to use this tool: `grunt build` or `grunt build:dev` will build the `.tmp` directory for
+development purposes. `grunt watch` will compile some files (coffee/compass/slim) and fire up livereload.
+
+`grunt build:dist` will build your code in `.tmp` and prepare it for release in `dist` directory.
+
+In any case, **the best way to use all these tasks** is by running: `grunt`, this will run `bundle install`,
+`grunt build:dev` and then `grunt watch`
+
 # Choices details
 
 Some details about my choices:
